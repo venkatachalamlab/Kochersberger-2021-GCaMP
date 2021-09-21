@@ -8,27 +8,8 @@ import h5py
 import numpy as np
 from tqdm import tqdm
 
-from .array_writer import TimestampedArrayWriter
-
-def get_metadata(dataset_path: Path):
-    json_filename = dataset_path / "metadata.json"
-    with open(json_filename) as json_file:
-        metadata = json.load(json_file)
-    return metadata
-  
-def get_times(dataset_path: Path):
-    h5_filename = dataset_path / "data.h5"
-
-    f = h5py.File(h5_filename, 'r')
-
-    return f["times"][:]
-  
-def get_slice(dataset_path: Path, t):
-    h5_filename = dataset_path / "data.h5"
-
-    f = h5py.File(h5_filename, 'r')
-
-    return f["data"][t]
+from array_writer import TimestampedArrayWriter
+from utils import get_metadata, get_times, get_slice
 
 def mip(vol, axis):
     return np.max(vol, axis=axis)
