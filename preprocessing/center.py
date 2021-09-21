@@ -1,15 +1,18 @@
 """ Functions used to crop and center volumetric recordings """
 
+import os
 import json
 import shutil
+from pathlib import Path
 
 import cv2
 import h5py
 import numpy as np
 from tqdm import tqdm
+from skimage import measure
 
-from array_writer import TimestampedArrayWriter
-from utils import get_metadata, get_times, get_slice
+from utils.array_writer import TimestampedArrayWriter
+from utils.utils import get_metadata, get_times, get_slice, apply_lut
 
 def mip(vol, axis):
     return np.max(vol, axis=axis)
@@ -43,17 +46,6 @@ def apply_tform(vol, tform, c_list):
                                             flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
     return vol
 
-def get_distance_matrix(path):
-    @lru_cache(maxsize=1500)
-    def get_thumbnail(t):
-        v = get_slice(path, t)
-        rfp = mip(v[0], 0)
-        return resize(rfp, np.array(rfp.shape) // 10)
-    D = get_all_pdists(get_thumbnail,
-                       list(range(shape_t)),
-                       dist_fn=dist_corrcoef)
-    return D + np.transpose(D)
-
 def get_closest_coord(old, new_list):
     distances = []
     for pairs in new_list:
@@ -84,7 +76,7 @@ def move_center(v):
     translation[1, 2] = cy - v.shape[2] // 2
     return apply_tform(v, translation, (0, 1))
   
-  def center(src):
+def center(src):
     src = Path(src)
     dst = src.parent / "centered"
     

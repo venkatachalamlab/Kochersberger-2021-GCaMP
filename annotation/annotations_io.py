@@ -12,7 +12,7 @@ import h5py
 import numpy as np
 import pandas as pd
 
-from dataclass_helpers import DataclassTableBase
+from annotation.dataclass_helpers import DataclassTableBase
 
 
 def base64str_from_uint32(x: np.uint32):
